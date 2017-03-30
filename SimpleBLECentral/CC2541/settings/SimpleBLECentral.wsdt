@@ -40,7 +40,7 @@
       </Debug-Log>
     </Static>
     <Windows>
-      <Wnd0>
+      <Wnd2>
         <Tabs>
           <Tab>
             <Identity>TabID-23647-22764</Identity>
@@ -57,8 +57,8 @@
           </Tab>
         </Tabs>
         <SelectedTab>0</SelectedTab>
-      </Wnd0>
-      <Wnd1>
+      </Wnd2>
+      <Wnd3>
         <Tabs>
           <Tab>
             <Identity>TabID-23125-22774</Identity>
@@ -86,7 +86,7 @@
           </Tab>
         </Tabs>
         <SelectedTab>0</SelectedTab>
-      </Wnd1>
+      </Wnd3>
     </Windows>
     <Editor>
       <Pane>
@@ -101,18 +101,6 @@
           <YPos2>955</YPos2>
           <SelStart2>48054</SelStart2>
           <SelEnd2>48063</SelEnd2>
-        </Tab>
-        <Tab>
-          <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_uart.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>90</YPos2>
-          <SelStart2>3717</SelStart2>
-          <SelEnd2>3717</SelEnd2>
         </Tab>
         <Tab>
           <Factory>TextEditor</Factory>
@@ -182,9 +170,9 @@
           <SelStart>0</SelStart>
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
-          <YPos2>155</YPos2>
-          <SelStart2>5702</SelStart2>
-          <SelEnd2>5702</SelEnd2>
+          <YPos2>151</YPos2>
+          <SelStart2>6089</SelStart2>
+          <SelEnd2>6128</SelEnd2>
         </Tab>
         <Tab>
           <Factory>TextEditor</Factory>
@@ -194,21 +182,9 @@
           <SelStart>0</SelStart>
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
-          <YPos2>324</YPos2>
-          <SelStart2>13820</SelStart2>
-          <SelEnd2>13820</SelEnd2>
-        </Tab>
-        <Tab>
-          <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\..\..\..\Components\ble\include\att.h</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>579</YPos2>
-          <SelStart2>23517</SelStart2>
-          <SelEnd2>23517</SelEnd2>
+          <YPos2>228</YPos2>
+          <SelStart2>10978</SelStart2>
+          <SelEnd2>10978</SelEnd2>
         </Tab>
         <Tab>
           <Factory>TextEditor</Factory>
@@ -224,19 +200,6 @@
         </Tab>
         <Tab>
           <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\Source\simpleBLECentral.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>1141</YPos2>
-          <SelStart2>36865</SelStart2>
-          <SelEnd2>36865</SelEnd2>
-        </Tab>
-        <ActiveTab>11</ActiveTab>
-        <Tab>
-          <Factory>TextEditor</Factory>
           <Filename>$WS_DIR$\..\..\..\..\Components\hal\include\hal_defs.h</Filename>
           <XPos>0</XPos>
           <YPos>0</YPos>
@@ -249,27 +212,15 @@
         </Tab>
         <Tab>
           <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\Source\simpleBLECentral_Main.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>65</YPos2>
-          <SelStart2>3655</SelStart2>
-          <SelEnd2>3655</SelEnd2>
-        </Tab>
-        <Tab>
-          <Factory>TextEditor</Factory>
           <Filename>$WS_DIR$\..\..\..\..\Components\osal\common\OSAL.c</Filename>
           <XPos>0</XPos>
           <YPos>0</YPos>
           <SelStart>0</SelStart>
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
-          <YPos2>1389</YPos2>
-          <SelStart2>38981</SelStart2>
-          <SelEnd2>38981</SelEnd2>
+          <YPos2>210</YPos2>
+          <SelStart2>7248</SelStart2>
+          <SelEnd2>7248</SelEnd2>
         </Tab>
         <Tab>
           <Factory>TextEditor</Factory>
@@ -294,6 +245,55 @@
           <YPos2>376</YPos2>
           <SelStart2>13900</SelStart2>
           <SelEnd2>13900</SelEnd2>
+        </Tab>
+        <Tab>
+          <Factory>TextEditor</Factory>
+          <Filename>$WS_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_uart.c</Filename>
+          <XPos>0</XPos>
+          <YPos>0</YPos>
+          <SelStart>0</SelStart>
+          <SelEnd>0</SelEnd>
+          <XPos2>0</XPos2>
+          <YPos2>206</YPos2>
+          <SelStart2>7172</SelStart2>
+          <SelEnd2>7172</SelEnd2>
+        </Tab>
+        <Tab>
+          <Factory>TextEditor</Factory>
+          <Filename>$WS_DIR$\..\Source\simpleBLECentral.c</Filename>
+          <XPos>0</XPos>
+          <YPos>0</YPos>
+          <SelStart>0</SelStart>
+          <SelEnd>0</SelEnd>
+          <XPos2>0</XPos2>
+          <YPos2>1188</YPos2>
+          <SelStart2>38702</SelStart2>
+          <SelEnd2>38702</SelEnd2>
+        </Tab>
+        <ActiveTab>14</ActiveTab>
+        <Tab>
+          <Factory>TextEditor</Factory>
+          <Filename>$WS_DIR$\..\Source\simpleBLECentral_Main.c</Filename>
+          <XPos>0</XPos>
+          <YPos>0</YPos>
+          <SelStart>0</SelStart>
+          <SelEnd>0</SelEnd>
+          <XPos2>0</XPos2>
+          <YPos2>65</YPos2>
+          <SelStart2>3655</SelStart2>
+          <SelEnd2>3655</SelEnd2>
+        </Tab>
+        <Tab>
+          <Factory>TextEditor</Factory>
+          <Filename>$WS_DIR$\..\..\..\..\Components\ble\include\att.h</Filename>
+          <XPos>0</XPos>
+          <YPos>0</YPos>
+          <SelStart>0</SelStart>
+          <SelEnd>0</SelEnd>
+          <XPos2>0</XPos2>
+          <YPos2>579</YPos2>
+          <SelStart2>23448</SelStart2>
+          <SelEnd2>23448</SelEnd2>
         </Tab>
       </Pane>
       <ActivePane>0</ActivePane>
@@ -324,7 +324,7 @@
       <Left>
         <Row0>
           <Sizes>
-            <Wnd0>
+            <Wnd2>
               <Rect>
                 <Top>-2</Top>
                 <Left>-2</Left>
@@ -339,7 +339,7 @@
                 <sizeVertCX>240625</sizeVertCX>
                 <sizeVertCY>668593</sizeVertCY>
               </Rect>
-            </Wnd0>
+            </Wnd2>
           </Sizes>
         </Row0>
       </Left>
@@ -351,7 +351,7 @@
       <Bottom>
         <Row0>
           <Sizes>
-            <Wnd1>
+            <Wnd3>
               <Rect>
                 <Top>-2</Top>
                 <Left>-2</Left>
@@ -366,7 +366,7 @@
                 <sizeVertCX>146354</sizeVertCX>
                 <sizeVertCY>291908</sizeVertCY>
               </Rect>
-            </Wnd1>
+            </Wnd3>
           </Sizes>
         </Row0>
       </Bottom>

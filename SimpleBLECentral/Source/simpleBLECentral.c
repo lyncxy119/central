@@ -637,7 +637,7 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
            ( pMsg->method == ATT_ERROR_RSP ) ||
            (pMsg->method == ATT_HANDLE_VALUE_IND))
   {
-      attHandleValueNoti_t noti;
+      volatile attHandleValueNoti_t noti;
 
     if ( pMsg->method == ATT_ERROR_RSP )
     {
@@ -646,14 +646,15 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
     }
     else
     {
+      static uint8 notifyData[20];
       // After a successful read, display the read value
       //uint8 valueRead = pMsg->msg.readRsp.value[0];
       noti.handle = pMsg->msg.handleValueNoti.handle;
       noti.len = pMsg->msg.handleValueNoti.len;
-    //  osal_memcpy(&noti.value, &pMsg->msg.handleValueNoti.value,noti.len);
+      osal_memcpy(notifyData, pMsg->msg.handleValueNoti.pValue,noti.len);
 
-      
-
+      HalUARTWrite( NPI_UART_PORT, notifyData, noti.len );
+ //NPI_PrintString("notify\r\n");
     }
   }
   else if ( ( pMsg->method == ATT_WRITE_RSP ) ||
@@ -1150,8 +1151,8 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   peerAddr[3] = 0x01;
                   peerAddr[4] = 0x35;
                   peerAddr[5] = 0xEF;*/
-                  peerAddr[5] = 0x5F;
-                  peerAddr[4] = 0x15;
+                  peerAddr[5] = 0x88;
+                  peerAddr[4] = 0x38;
                   peerAddr[3] = 0x00;
                   peerAddr[2] = 0x01;
                   peerAddr[1] = 0x35;
@@ -1180,7 +1181,7 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   NPI_PrintString("writing...\r\n");
                   
                   
-                  /*req.handle = 0x19;
+                  req.handle = 0x12;
                   req.len = 2;
                   req.pValue[0] = 0x01;
                   req.pValue[1] = 0x00;
@@ -1188,8 +1189,29 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   req.sig = 0;
                   req.cmd = 0;
                   status = GATT_WriteCharValue( simpleBLEConnHandle, &req, simpleBLETaskId );
-                  */
                   
+                  if ( status != SUCCESS )
+                  {
+                    GATT_bm_free( (gattMsg_t *)&req, ATT_WRITE_REQ );
+                  }
+                  else
+                  {
+                    NPI_PrintString("write ok\r\n");
+                  }
+                
+                }
+                }
+                if(buffer[0] == 0x04)
+                {
+                  char status;
+                   attWriteReq_t req;
+        
+                req.pValue = GATT_bm_alloc( simpleBLEConnHandle, ATT_WRITE_REQ, 3, NULL );
+                if ( req.pValue != NULL )
+                {
+                  NPI_PrintString("writing...\r\n");
+                  
+              
                   req.handle = 0x15;
                   req.len = 3;
                   req.pValue[0] = 0x00;
@@ -1207,6 +1229,7 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                     NPI_PrintString("write ok\r\n");
                   }
                 }
+                
                     //把收到的数据发送到串口-实现回环   
                // NPI_WriteTransport(buffer, numBytes); 
               }  
