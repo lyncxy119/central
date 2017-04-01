@@ -633,6 +633,36 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
     
     simpleBLEProcedureInProgress = FALSE;
   }
+  else if(pMsg->method == ATT_READ_BY_GRP_TYPE_RSP)
+  {
+    uint8 handle[30];
+    attReadByGrpTypeRsp_t readByGrpTypeRsp;
+      readByGrpTypeRsp.numGrps = pMsg->msg.readByGrpTypeRsp.numGrps;
+      memcpy(handle,pMsg->msg.readByGrpTypeRsp.pDataList,pMsg->msg.readByGrpTypeRsp.len);//pMsg->msg.readByGrpTypeRsp.len
+      simpleBLESvcStartHdl = pMsg->msg.findByTypeValueRsp.pHandlesInfo[0];
+       simpleBLESvcEndHdl = pMsg->msg.findByTypeValueRsp.pHandlesInfo[1];
+     NPI_PrintString("UUID ");
+     for(uint8 i = 0;i< pMsg->msg.readByGrpTypeRsp.len;i++)
+     {
+      NPI_PrintValue(" ",handle[i],16);
+     }
+     NPI_PrintString("\r\n");
+      GATT_DiscAllChars( simpleBLEConnHandle, 0x0010,
+                                        0x002C, simpleBLETaskId );
+    // HalUARTWrite( NPI_UART_PORT, handle, pMsg->msg.readByGrpTypeRsp.len );
+  }
+  else if(pMsg->method == ATT_READ_BY_TYPE_RSP && pMsg->msg.readByTypeRsp.numPairs >0)
+  {
+     uint8 handle[30];
+    NPI_PrintString("CharacterUUID ");
+     memcpy(handle,pMsg->msg.readByGrpTypeRsp.pDataList,pMsg->msg.readByGrpTypeRsp.len);//pMsg->msg.readByGrpTypeRsp.len
+     for(uint8 i = 0;i< pMsg->msg.readByGrpTypeRsp.len;i++)
+     {
+      NPI_PrintValue(" ",handle[i],16);
+     }
+   // pMsg->msg.readByTypeRsp.pDataList 
+    NPI_PrintString("\r\n");
+  }
   else if( ( pMsg->method == ATT_HANDLE_VALUE_NOTI)||
            ( pMsg->method == ATT_ERROR_RSP ) ||
            (pMsg->method == ATT_HANDLE_VALUE_IND))
@@ -642,7 +672,7 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
     if ( pMsg->method == ATT_ERROR_RSP )
     {
       uint8 status = pMsg->msg.errorRsp.errCode;
-
+      
     }
     else
     {
@@ -914,10 +944,12 @@ static void simpleBLECentralStartDiscovery( void )
   simpleBLEDiscState = BLE_DISC_STATE_SVC;
  // GATT_DiscAllChars(simpleBLEConnHandle,14,20,simpleBLETaskId);
   // Discovery simple BLE service
-  GATT_DiscPrimaryServiceByUUID( simpleBLEConnHandle,
+ /* GATT_DiscPrimaryServiceByUUID( simpleBLEConnHandle,
                                  uuid,
                                  ATT_UUID_SIZE,
-                                 simpleBLETaskId );
+                                 simpleBLETaskId );*/
+  
+  GATT_DiscAllPrimaryServices(simpleBLEConnHandle,simpleBLETaskId);
 }
 
 /*********************************************************************
@@ -1151,8 +1183,8 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   peerAddr[3] = 0x01;
                   peerAddr[4] = 0x35;
                   peerAddr[5] = 0xEF;*/
-                  peerAddr[5] = 0x88;
-                  peerAddr[4] = 0x38;
+                  peerAddr[5] = 0x5F;
+                  peerAddr[4] = 0x15;
                   peerAddr[3] = 0x00;
                   peerAddr[2] = 0x01;
                   peerAddr[1] = 0x35;
