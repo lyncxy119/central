@@ -70,6 +70,14 @@
 /*********************************************************************
  * MACROS
  */
+#define SEEK_HEAD 0
+#define SEEK_LEN 1
+#define SEEK_TYPE 2
+#define RX_DATA  3
+#define ESC      4
+#define ESC_F0       5
+#define ESC_F5       6
+#define ESC_FA       7
 
 // Length of bd addr as a string
 #define B_ADDR_STR_LEN                        15
@@ -814,7 +822,7 @@ static uint8 simpleBLECentralEventCB( gapCentralRoleEvent_t *pEvent )
           {
             osal_start_timerEx( simpleBLETaskId, START_DISCOVERY_EVT, DEFAULT_SVC_DISCOVERY_DELAY );
           }
-           NPI_PrintString("connected device  ");     
+           NPI_PrintString("Connected device  ");     
           NPI_PrintString(bdAddr2Str( pEvent->linkCmpl.devAddr));
           NPI_PrintString("\r\n");
           LCD_WRITE_STRING( "Connected", HAL_LCD_LINE_1 );
@@ -1141,38 +1149,243 @@ char *bdAddr2Str( uint8 *pAddr )
   return str;
 }
 
+/*********************************************************************
+ * @fn      连接蓝牙
+ *
+ * @brief   连接指定mac地址的蓝牙设备
+ * @param   macAddr   mac地址    
+ *
+ * @return  none
+/**********************************************************************/
+void ConnectMac(uint8 * macAddr)
+{
+   char *peerAddr;
+   uint8 addrType;
+                                 
+     peerAddr[5] = macAddr[0];
+     peerAddr[4] = macAddr[1];
+     peerAddr[3] = macAddr[2];
+     peerAddr[2] = macAddr[3];
+     peerAddr[1] = macAddr[4];
+     peerAddr[0] = macAddr[5];
+                                
+     addrType = 0;
+     simpleBLEState = BLE_STATE_CONNECTING;
+     NPI_PrintString("Connecting...\r\n");
+                                
+    GAPCentralRole_EstablishLink( DEFAULT_LINK_HIGH_DUTY_CYCLE,
+                                  DEFAULT_LINK_WHITE_LIST,
+                                  addrType, peerAddr );
+}
+static uint8 rxData[100];
 static void NpiSerialCallback( uint8 port, uint8 events )  
 {  
     (void)port;//加个 (void)，是未了避免编译告警，明确告诉缓冲区不用理会这个变量  
   
-    if (events & (HAL_UART_RX_TIMEOUT | HAL_UART_RX_FULL))   //串口有数据  
+    if (events & (HAL_UART_RX_TIMEOUT | HAL_UART_RX_FULL))   //串口有数据 
     {  
-        uint8 numBytes = 0;  
+        static uint8 numBytes = 0;  
   
         numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节  
-          
         if(numBytes == 0)  
         {  
             return;  
         }  
         else  
         {  
+          static uint8 currState = SEEK_HEAD,rxlen = 0,index = 0,rxLEN,rxTYPE;
             //申请缓冲区buffer  
-            uint8 *buffer = osal_mem_alloc(numBytes);  
+            uint8 *buffer = osal_mem_alloc(numBytes); 
+            uint8 rxByte,escFlag = 0;
+            
             if(buffer)  
             {  
                 //读取读取串口缓冲区数据，释放串口数据     
-                NPI_ReadTransport(buffer,numBytes);     
-                if(buffer[0] == 0x01)
+                NPI_ReadTransport(buffer,numBytes); 
+                static uint8 rx_len = 0;
+                memcpy(rxData + rx_len,buffer,numBytes);
+                rx_len = numBytes;
+               // NPI_WriteTransport(buffer,numBytes);
+                // printf("len2 %d\n",numBytes);
+                //uint16 index = 0;
+              //  NPI_PrintString(rxData);
+             //   NPI_PrintString("\r\n");
+              //  NPI_PrintString(buffer);
+
+                if(strncmp(rxData,"connect Mac",11) == 0)
                 {
-                  NPI_PrintString("scanning...\r\n");
-                  GAPCentralRole_StartDiscovery( DEFAULT_DISCOVERY_MODE,
-                                       DEFAULT_DISCOVERY_ACTIVE_SCAN,
-                                       DEFAULT_DISCOVERY_WHITE_LIST );   
+                  uint8 macAddr[18] = {0};
+                  static uint8 macAddrHex[6];
+                  memcpy(macAddr,rxData+ 12,17);
+                  sscanf(macAddr,"%x:%x:%x:%x:%x:%x",macAddrHex,macAddrHex+1,macAddrHex+2,macAddrHex+3,macAddrHex+4,macAddrHex+5);
+                  
+                  NPI_PrintString("connecting Mac ");
+                  NPI_PrintString(macAddr);
+                  NPI_PrintString("\r\n");
+                  rx_len = 0;
+                 memset(rxData,0,50);
+                 
+                 ConnectMac(macAddrHex);
                 }
-                 if(buffer[0] == 0x02)
+                else if(strncmp(rxData,"connect Mac",11) == 0)
                 {
-                  NPI_PrintString("connecting...\r\n");
+                  uint8 macAddr[18] = {0};
+                  static uint8 macAddrHex[6];
+                  memcpy(macAddr,rxData+ 12,17);
+                  sscanf(macAddr,"%x:%x:%x:%x:%x:%x",macAddrHex,macAddrHex+1,macAddrHex+2,macAddrHex+3,macAddrHex+4,macAddrHex+5);
+                  
+                  NPI_PrintString("connecting Mac ");
+                  NPI_PrintString(macAddr);
+                  NPI_PrintString("\r\n");
+                  rx_len = 0;
+                 memset(rxData,0,50);
+                 
+                 ConnectMac(macAddrHex);
+                }
+                HalLcd_HW_WaitUs(5000);
+                  osal_mem_free(buffer); 
+#if 0
+                for(uint8 i =0;i<numBytes;i++)
+                {
+                 
+                  rxByte = *(buffer+i);
+                  if(*(buffer+i) == 0xF0)
+                  {
+                    currState = SEEK_HEAD;
+                  }
+                  switch(currState)
+                  {
+                  case SEEK_HEAD:
+                    if(rxByte == 0xF0)
+                    currState = SEEK_TYPE;
+                    break;
+             
+                  case SEEK_TYPE:
+                     currState = SEEK_LEN;
+                     rxTYPE = rxByte; 
+                     break;
+                  case SEEK_LEN:
+                    currState = RX_DATA;
+                    rxLEN = rxByte;
+                    break;
+                  case RX_DATA:
+                       if(rxlen < rxLEN)
+                       {
+                         if(rxByte == 0xF5)
+                          {
+                            escFlag = 1;
+                            continue;
+                          }
+                          if(escFlag == 1)
+                          {
+                            escFlag = 0;
+                            switch(rxByte)
+                            {
+                            case 0x01:
+                             rxData[rxlen++] = 0xF0;
+                              break;
+                            case 0x02:
+                              rxData[rxlen++] = 0xF5;
+                              break;
+                            case 0x03:
+                              rxData[rxlen++] = 0xFA;
+                              break;
+                            default:
+                              break;
+                            }
+                           }
+                           else
+                           {
+                            rxData[rxlen++] = rxByte;
+                            if(rxlen == rxLEN)
+                            {
+                               uint8 checksum = 0;
+                               for(uint8 i = 0;i< rxLEN - 1;i++)
+                               {
+                                checksum = checksum + rxData[i];
+                               }
+                               checksum = checksum + rxLEN + rxTYPE;
+                               if(checksum == rxData[rxlen -1])
+                               {
+                                switch(rxTYPE)
+                                {
+                                case 0x01://扫描
+                                  
+                                  NPI_PrintString("scanning...\r\n");
+                                  GAPCentralRole_StartDiscovery( DEFAULT_DISCOVERY_MODE,
+                                       DEFAULT_DISCOVERY_ACTIVE_SCAN,
+                                       DEFAULT_DISCOVERY_WHITE_LIST );
+                                  break;
+                                case 0x02://连接蓝牙
+                                  char *peerAddr;
+                                  uint8 addrType;
+                                  // connect to current device in scan result
+                                 // peerAddr = {0x5F,0x15,0x00,0x01,0x35,0xEF};
+                                /*  peerAddr[0] = 0x5F;
+                                  peerAddr[1] = 0x15;
+                                  peerAddr[2] = 0x00;
+                                  peerAddr[3] = 0x01;
+                                  peerAddr[4] = 0x35;
+                                  peerAddr[5] = 0xEF;*/
+                                  peerAddr[5] = rxData[0];
+                                  peerAddr[4] = rxData[1];
+                                  peerAddr[3] = rxData[2];
+                                  peerAddr[2] = rxData[3];
+                                  peerAddr[1] = rxData[4];
+                                  peerAddr[0] = rxData[5];
+                                     // memcpy(peerAddr,rxData,6);
+                                  addrType = 0;
+                             //   static uint8 debugDisplay[6];
+                               // memcpy(debugDisplay,peerAddr,6);
+                                  simpleBLEState = BLE_STATE_CONNECTING;
+                                  NPI_PrintString("Connecting...\r\n");
+                                
+                                //NPI_PrintString("\r\n");
+                                  GAPCentralRole_EstablishLink( DEFAULT_LINK_HIGH_DUTY_CYCLE,
+                                                                DEFAULT_LINK_WHITE_LIST,
+                                                                addrType, peerAddr );
+                                  break;
+                                case 0x03:
+                                  GAPCentralRole_TerminateLink(simpleBLEConnHandle);
+                                  break;
+                                case 0x04:
+                                  break;
+                                default:
+                                  break;
+                                }
+                               }
+                                 
+                               rxlen = 0;
+                                 rxLEN = 0;
+                                 index = 0;
+                                currState = SEEK_HEAD;
+                                //释放申请的缓冲区  
+                                osal_mem_free(buffer); 
+                            }
+                           }
+                       }
+                       else
+                       {
+                        
+                         rxlen = 0;
+                         rxLEN = 0;
+                        currState = SEEK_HEAD;
+                        index = 0;
+                        //释放申请的缓冲区  
+              
+                       }
+                    break;
+                    
+                  }
+                   
+                }
+#endif  
+ 
+#if 0
+                 if(buffer[0] == 0x55 && buffer[1] == 0xAA)
+                {
+           //       NPI_PrintString("connecting...\r\n");
+                  NPI_WriteTransport(buffer,numBytes);
                   char *peerAddr;
                   uint8 addrType;
                   // connect to current device in scan result
@@ -1183,17 +1396,23 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   peerAddr[3] = 0x01;
                   peerAddr[4] = 0x35;
                   peerAddr[5] = 0xEF;*/
-                  peerAddr[5] = 0x5F;
-                  peerAddr[4] = 0x15;
-                  peerAddr[3] = 0x00;
-                  peerAddr[2] = 0x01;
-                  peerAddr[1] = 0x35;
-                  peerAddr[0] = 0xEF;
-                      
+                  peerAddr[5] = buffer[2];
+                  peerAddr[4] = buffer[3];
+                  peerAddr[3] = buffer[4];
+                  peerAddr[2] = buffer[5];
+                  peerAddr[1] = buffer[6];
+                  peerAddr[0] = buffer[7];
+                     // memcpy(peerAddr,buffer+2,6);
         addrType = 0;
-      
+   //   static uint8 debugDisplay[6];
+     // memcpy(debugDisplay,peerAddr,6);
         simpleBLEState = BLE_STATE_CONNECTING;
-        
+     //   NPI_PrintString("connecting mac ");
+     /* for(uint8 i  = 0;i<6;i++)
+       {
+         NPI_PrintValue("%x:",peerAddr[i],16);
+       }*/
+    //   NPI_PrintString("\r\n");
         GAPCentralRole_EstablishLink( DEFAULT_LINK_HIGH_DUTY_CYCLE,
                                       DEFAULT_LINK_WHITE_LIST,
                                       addrType, peerAddr );
@@ -1201,7 +1420,8 @@ static void NpiSerialCallback( uint8 port, uint8 events )
         
      //   GATT_DiscAllCharDescs(simpleBLEConnHandle,12,15,simpleBLETaskId);
                 }
-                
+#endif
+        /*        
                 if(buffer[0] == 0x03)
                 {
                   char status;
@@ -1259,16 +1479,15 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   else
                   {
                     NPI_PrintString("write ok\r\n");
-                  }
+                  } 
                 }
-                
+               
                     //把收到的数据发送到串口-实现回环   
                // NPI_WriteTransport(buffer, numBytes); 
-              }  
-                //释放申请的缓冲区  
-                osal_mem_free(buffer);  
+              }  */
+                 
               
-        }  
+       }  
     } 
     }
 }  

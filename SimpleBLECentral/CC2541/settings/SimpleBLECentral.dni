@@ -1,5 +1,5 @@
 [DebugChecksum]
-Checksum=-1269418803
+Checksum=-1814070824
 [Stack]
 FillEnabled=0
 OverflowWarningsEnabled=1
@@ -14,6 +14,8 @@ ByteLimit=50
 ShowArgs=0
 [Disassembly]
 MixedMode=1
+[watch_formats]
+Fmt0={W}1:peerAddr	4	0
 [Breakpoints]
 Bp0=_ "STD_LOG" "LogicalCode:0x29237" 0 0 0 0 "" 0 "" 0
 Count=1
