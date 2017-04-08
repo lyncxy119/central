@@ -700,7 +700,7 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
       NPI_PrintString("handle ");
       _ltoa(noti.handle,handlestr,16);
       NPI_PrintString(handlestr);
-       NPI_PrintString(" ");
+       NPI_PrintString("  ");
       for(uint8 i = 0;i< 20;i++)
       {
        NPI_PrintValue("0x",(uint16)*(notifyData+i),16);
@@ -850,7 +850,7 @@ static uint8 simpleBLECentralEventCB( gapCentralRoleEvent_t *pEvent )
           simpleBLEConnHandle = GAP_CONNHANDLE_INIT;
           simpleBLERssi = FALSE;
           simpleBLEDiscState = BLE_DISC_STATE_IDLE;
-          
+          NPI_PrintString("Connected Failed");
           LCD_WRITE_STRING( "Connect Failed", HAL_LCD_LINE_1 );
           LCD_WRITE_STRING_VALUE( "Reason:", pEvent->gap.hdr.status, 10, HAL_LCD_LINE_2 );
         }
