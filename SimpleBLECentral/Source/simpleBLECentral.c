@@ -144,7 +144,7 @@
 #define DEFAULT_SVC_DISCOVERY_DELAY           1000
 
 // TRUE to filter discovery results on desired service UUID
-#define DEFAULT_DEV_DISC_BY_SVC_UUID          TRUE
+#define DEFAULT_DEV_DISC_BY_SVC_UUID          FALSE
 
 // Application states
 enum
@@ -337,6 +337,7 @@ NPI_WriteTransport("I'm coming\r\n", 20);
 // 按字符串输出    
 NPI_PrintString("SimpleBLETest_Init2\r\n");      
     */
+#if 0
 // 可以输出一个值，用10进制表示    
 NPI_PrintValue("甜甜的大香瓜1 = ", 168, 10);    
 NPI_PrintString("\r\n");      
@@ -344,6 +345,7 @@ NPI_PrintString("\r\n");
 // 可以输出一个值，用16进制表示    
 NPI_PrintValue("甜甜的大香瓜2 = 0x", 0x88, 16);    
 NPI_PrintString("\r\n");   
+#endif
 }
 
 /*********************************************************************
@@ -441,7 +443,7 @@ uint8 gStatus;
 static void simpleBLECentral_HandleKeys( uint8 shift, uint8 keys )
 {
   (void)shift;  // Intentionally unreferenced parameter
-
+return;
   if ( keys & HAL_KEY_UP )
   {
     // Start or stop discovery
@@ -649,19 +651,22 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
       memcpy(handle,pMsg->msg.readByGrpTypeRsp.pDataList,pMsg->msg.readByGrpTypeRsp.len);//pMsg->msg.readByGrpTypeRsp.len
       simpleBLESvcStartHdl = pMsg->msg.findByTypeValueRsp.pHandlesInfo[0];
        simpleBLESvcEndHdl = pMsg->msg.findByTypeValueRsp.pHandlesInfo[1];
-     NPI_PrintString("UUID ");
+    if(pMsg->msg.readByGrpTypeRsp.len > 0)
+    {
+      NPI_PrintString("svc: ");
      for(uint8 i = 0;i< pMsg->msg.readByGrpTypeRsp.len;i++)
      {
       NPI_PrintValue(" ",handle[i],16);
      }
      NPI_PrintString("\r\n");
+    }
       GATT_DiscAllChars( simpleBLEConnHandle, 0x0010,
                                         0x002C, simpleBLETaskId );
     // HalUARTWrite( NPI_UART_PORT, handle, pMsg->msg.readByGrpTypeRsp.len );
   }
   else if(pMsg->method == ATT_READ_BY_TYPE_RSP && pMsg->msg.readByTypeRsp.numPairs >0)
   {
-     uint8 handle[30];
+     uint8 handle[20];
     NPI_PrintString("CharacterUUID ");
      memcpy(handle,pMsg->msg.readByGrpTypeRsp.pDataList,pMsg->msg.readByGrpTypeRsp.len);//pMsg->msg.readByGrpTypeRsp.len
      for(uint8 i = 0;i< pMsg->msg.readByGrpTypeRsp.len;i++)
@@ -685,13 +690,26 @@ static void simpleBLECentralProcessGATTMsg( gattMsgEvent_t *pMsg )
     else
     {
       static uint8 notifyData[20];
+      static uint8 handlestr[2];
+      
       // After a successful read, display the read value
       //uint8 valueRead = pMsg->msg.readRsp.value[0];
       noti.handle = pMsg->msg.handleValueNoti.handle;
       noti.len = pMsg->msg.handleValueNoti.len;
       osal_memcpy(notifyData, pMsg->msg.handleValueNoti.pValue,noti.len);
-
-      HalUARTWrite( NPI_UART_PORT, notifyData, noti.len );
+      NPI_PrintString("handle ");
+      _ltoa(noti.handle,handlestr,16);
+      NPI_PrintString(handlestr);
+       NPI_PrintString(" ");
+      for(uint8 i = 0;i< 20;i++)
+      {
+       NPI_PrintValue("0x",(uint16)*(notifyData+i),16);
+      // sprintf(handlestr,"0x%X ",*(notifyData+i));
+       NPI_PrintString(" ");
+      }
+    //  HalUARTWrite( NPI_UART_PORT, notifyData, noti.len );
+      //NPI_PrintString(handlestr);
+      NPI_PrintString("  \r\n");
  //NPI_PrintString("notify\r\n");
     }
   }
@@ -779,7 +797,7 @@ static uint8 simpleBLECentralEventCB( gapCentralRoleEvent_t *pEvent )
         simpleBLEScanning = FALSE;
 
         // if not filtering device discovery results based on service UUID
-   //    if ( DEFAULT_DEV_DISC_BY_SVC_UUID == FALSE )
+       if ( DEFAULT_DEV_DISC_BY_SVC_UUID == FALSE )
         {
           // Copy results
           simpleBLEScanRes = pEvent->discCmpl.numDevs;
@@ -796,7 +814,7 @@ static uint8 simpleBLECentralEventCB( gapCentralRoleEvent_t *pEvent )
             NPI_PrintString(bdAddr2Str(simpleBLEDevList[i].addr));
              NPI_PrintString("\r\n");
           }
-        GAPCentralRole_CancelDiscovery();
+     //   GAPCentralRole_CancelDiscovery();
       //   NPI_PrintString("Devices Found\r\n");
         if ( simpleBLEScanRes > 0 )
         {
@@ -825,8 +843,6 @@ static uint8 simpleBLECentralEventCB( gapCentralRoleEvent_t *pEvent )
            NPI_PrintString("Connected device  ");     
           NPI_PrintString(bdAddr2Str( pEvent->linkCmpl.devAddr));
           NPI_PrintString("\r\n");
-          LCD_WRITE_STRING( "Connected", HAL_LCD_LINE_1 );
-          LCD_WRITE_STRING( bdAddr2Str( pEvent->linkCmpl.devAddr ), HAL_LCD_LINE_2 );   
         }
         else
         {
@@ -850,9 +866,10 @@ static uint8 simpleBLECentralEventCB( gapCentralRoleEvent_t *pEvent )
         simpleBLECharHdl = 0;
         simpleBLEProcedureInProgress = FALSE;
         NPI_PrintString("disconnected\r\n");  
-        LCD_WRITE_STRING( "Disconnected", HAL_LCD_LINE_1 );
+     /*   LCD_WRITE_STRING( "Disconnected", HAL_LCD_LINE_1 );
         LCD_WRITE_STRING_VALUE( "Reason:", pEvent->linkTerminate.reason,
-                                10, HAL_LCD_LINE_2 );
+                                10, HAL_LCD_LINE_2 );*/
+    //    SystemResetSoft();
       }
       break;
 
@@ -945,7 +962,6 @@ static void simpleBLECentralStartDiscovery( void )
   /*uint8 uuid[ATT_BT_UUID_SIZE] = { LO_UINT16(SIMPLEPROFILE_SERV_UUID),
                                    HI_UINT16(SIMPLEPROFILE_SERV_UUID) };*/
  
-  uint8 uuid[ATT_UUID_SIZE] = {0x8b, 0xb9, 0xb1, 0xcd, 0x90, 0x4c, 0x4d, 0xe3, 0xbb, 0x7b, 0xbb, 0x27, 0xb2, 0x2e, 0xdd, 0xe6};
   // Initialize cached handles
   simpleBLESvcStartHdl = simpleBLESvcEndHdl = simpleBLECharHdl = 0;
 
@@ -1177,6 +1193,36 @@ void ConnectMac(uint8 * macAddr)
                                   DEFAULT_LINK_WHITE_LIST,
                                   addrType, peerAddr );
 }
+
+void WriteValue(unsigned short handle,unsigned char *value,unsigned char len)
+{
+  char status;
+  attWriteReq_t req;
+        
+ req.pValue = GATT_bm_alloc( simpleBLEConnHandle, ATT_WRITE_REQ, len, NULL );
+  if ( req.pValue != NULL )
+  {
+   NPI_PrintString("writing...\r\n");
+                  
+   req.handle = handle;
+   req.len = len;
+   //req.pValue[0] = 0x01;
+  // req.pValue[1] = 0x00;
+   memcpy(req.pValue,value,len);
+                  
+   req.sig = 0;
+   req.cmd = 0;
+   status = GATT_WriteCharValue( simpleBLEConnHandle, &req, simpleBLETaskId );
+   if ( status != SUCCESS )
+   {
+     GATT_bm_free( (gattMsg_t *)&req, ATT_WRITE_REQ );
+   }
+   else
+   {
+     NPI_PrintString("write ok\r\n");
+   }
+  }
+}
 static uint8 rxData[100];
 static void NpiSerialCallback( uint8 port, uint8 events )  
 {  
@@ -1224,26 +1270,46 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                   NPI_PrintString("\r\n");
                   rx_len = 0;
                  memset(rxData,0,50);
-                 
+             //     GAPCentralRole_CancelDiscovery();
                  ConnectMac(macAddrHex);
                 }
-                else if(strncmp(rxData,"connect Mac",11) == 0)
+                else if(strncmp(rxData,"disconnect",10) == 0)
                 {
-                  uint8 macAddr[18] = {0};
-                  static uint8 macAddrHex[6];
-                  memcpy(macAddr,rxData+ 12,17);
-                  sscanf(macAddr,"%x:%x:%x:%x:%x:%x",macAddrHex,macAddrHex+1,macAddrHex+2,macAddrHex+3,macAddrHex+4,macAddrHex+5);
-                  
-                  NPI_PrintString("connecting Mac ");
-                  NPI_PrintString(macAddr);
-                  NPI_PrintString("\r\n");
-                  rx_len = 0;
+                  GAPCentralRole_TerminateLink(simpleBLEConnHandle);
+                   rx_len = 0;
                  memset(rxData,0,50);
+                }
+                else if(strncmp(rxData,"scan device",11) == 0)
+                {
+                   NPI_PrintString("scanning...\r\n");
+                   GAPCentralRole_StartDiscovery( DEFAULT_DISCOVERY_MODE,
+                                       DEFAULT_DISCOVERY_ACTIVE_SCAN,
+                                       DEFAULT_DISCOVERY_WHITE_LIST );
+                    rx_len = 0;
+                 memset(rxData,0,50);
+                }
+                else if(strncmp(rxData,"WriteHandle",11) == 0)
+                {
+                  static unsigned short handle,len;
+                  len = strlen(rxData);
+                  len = (len - 22)/3;
+                  static unsigned char writeValue[20]={0x00};
+                  sscanf(rxData,"WriteHandle: %x Value: %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x",
+                         &handle,
+                         writeValue,writeValue+1,writeValue+2,writeValue+3,writeValue+4,writeValue+5,
+                         writeValue+6,writeValue+7,writeValue+8,writeValue+9,writeValue+10,writeValue+11,
+                         writeValue+12,writeValue+13,writeValue+14,writeValue+15,writeValue+16,writeValue+17,
+                         writeValue+18,writeValue+19);
+                 // sscanf(rxData+15,"WriteHandle:%d",&handle);
                  
-                 ConnectMac(macAddrHex);
+                   WriteValue(handle,writeValue,len);
+                 // WriteValue(0x15,writeValue,3);
+                    rx_len = 0;
+                 memset(rxData,0,50);
                 }
                 HalLcd_HW_WaitUs(5000);
                   osal_mem_free(buffer); 
+           // }
 #if 0
                 for(uint8 i =0;i<numBytes;i++)
                 {

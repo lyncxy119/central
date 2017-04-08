@@ -262,8 +262,8 @@ void NPI_PrintValue(char *title, uint16 value, uint8 format)
   
   tmpLen = (uint8)osal_strlen( (char*)title );  
   osal_memcpy( buf, title, tmpLen );  
-  buf[tmpLen] = ' ';  
+  //buf[tmpLen] = ' ';  
   err = (uint32)(value);  
-  _ltoa( err, &buf[tmpLen+1], format );  
+  _ltoa( err, &buf[tmpLen], format );  
   NPI_PrintString(buf);       
 }  
